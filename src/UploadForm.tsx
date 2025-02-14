@@ -5,6 +5,8 @@ const UploadForm = () => {
     const [file, setFile] = useState<File | null>(null);
     const [dragActive, setDragActive] = useState(false);
     const [googleSheetLink, setGoogleSheetLink] = useState("");
+    const [sheetName, setSheetName] = useState("");
+    const [fastMode, setFastMode] = useState(false);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
@@ -41,6 +43,10 @@ const UploadForm = () => {
             return alert("Please provide the Google Sheets link!");
         }
 
+        if (!sheetName.trim()) {
+            return alert("Please provide the Google Sheet's sheet name!");
+        }
+
         setLoading(true);
         setStatus("idle");
 
@@ -48,12 +54,13 @@ const UploadForm = () => {
         formData.append("pdf", file);
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 10000)); // Эмуляция долгого ответа сервера
-
-            const response = await fetch("http://localhost:3001/upload", {
-                method: "POST",
-                body: formData,
-            });
+            const response = await fetch(
+                `http://localhost:80/upload?googleSheetUrl=${encodeURIComponent(googleSheetLink)}&sheetName=${encodeURIComponent(sheetName)}&fastMode=${fastMode}`,
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
 
             if (response.ok) {
                 setStatus("success");
@@ -108,10 +115,30 @@ const UploadForm = () => {
                 />
             </div>
 
+            <div className="mt-4">
+                <input
+                    type="text"
+                    value={sheetName}
+                    onChange={(e) => setSheetName(e.target.value)}
+                    placeholder="Enter the sheet name"
+                    className="w-96 p-2 border-2 border-gray-300 rounded-lg"
+                />
+            </div>
+
+            <div className="mt-4 flex items-center">
+                <input
+                    type="checkbox"
+                    checked={fastMode}
+                    onChange={(e) => setFastMode(e.target.checked)}
+                    className="mr-2"
+                />
+                <label className="text-gray-700">Fast mode</label>
+            </div>
+
             <button
                 onClick={handleSubmit}
                 className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-                disabled={loading}
+                disabled={loading || !sheetName.trim()}
             >
                 {loading ? "Uploading..." : "Submit"}
             </button>
