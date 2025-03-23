@@ -60,6 +60,6 @@ jobs:
 
             # Перезапуск и развертывание приложения
             cd $APP_DIR
-            pm2 start "serve -s build -l 0.0.0.0:3000" --name bom-matcher
-            pm2 save --force
+            pm2 delete all
+            pm2 start "serve -s build -l 3000" --name bom-matcher
           EOF
