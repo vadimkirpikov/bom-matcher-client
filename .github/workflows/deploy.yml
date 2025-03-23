@@ -41,10 +41,21 @@ jobs:
           # Используем scp для копирования файлов
           scp -r -i ~/.ssh/id_rsa dist/ $SERVER_USER@$SERVER_IP:$APP_DIR/build
 
-          # Развертывание приложения на сервере
+          # Установим Node.js и pm2 на сервере, если не установлены
           ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_IP << 'EOF'
+            # Установка Node.js (если еще не установлен)
+            if ! command -v node &> /dev/null; then
+              curl -fsSL https://deb.nodesource.com/setup_23.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+            fi
+
+            # Установка pm2 (если не установлен)
+            if ! command -v pm2 &> /dev/null; then
+              sudo npm install -g pm2
+            fi
+
+            # Перезапуск и развертывание приложения
             cd $APP_DIR
-            npm install -g serve pm2
             pm2 delete bom-matcher || true
             pm2 start serve --name bom-matcher -- serve -s build -l 3000
             pm2 save
