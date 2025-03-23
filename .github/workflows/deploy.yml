@@ -53,6 +53,10 @@ jobs:
             if ! command -v pm2 &> /dev/null; then
               sudo npm install -g pm2
             fi
+          
+            if ! command -v serve &> /dev/null; then
+              sudo npm install -g serve
+            fi
 
             # Перезапуск и развертывание приложения
             cd $APP_DIR
