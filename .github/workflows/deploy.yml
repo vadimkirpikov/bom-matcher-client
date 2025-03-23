@@ -39,7 +39,7 @@ jobs:
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
           # Используем scp для копирования файлов
-          scp -r -i ~/.ssh/id_rsa build/ $SERVER_USER@$SERVER_IP:$APP_DIR/build
+          scp -r -i ~/.ssh/id_rsa dist/ $SERVER_USER@$SERVER_IP:$APP_DIR/build
 
           # Развертывание приложения на сервере
           ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_IP << 'EOF'
