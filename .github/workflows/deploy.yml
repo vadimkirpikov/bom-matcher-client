@@ -56,7 +56,6 @@ jobs:
 
             # Перезапуск и развертывание приложения
             cd $APP_DIR
-            pm2 delete bom-matcher || true
             pm2 start serve --name bom-matcher -- serve -s build -l 3000
             pm2 save
           EOF
