@@ -38,7 +38,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
-          rsync -avz --delete ./build/ $SERVER_USER@$SERVER_IP:$APP_DIR/build
+          rsync -avz --delete build/ $SERVER_USER@$SERVER_IP:$APP_DIR/build
 
           ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_IP << 'EOF'
             cd $APP_DIR
