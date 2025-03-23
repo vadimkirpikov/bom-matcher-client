@@ -1,0 +1,49 @@
+name: Deploy React App
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout репозиторий
+        uses: actions/checkout@v4
+
+      - name: Установить Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23
+
+      - name: Установить зависимости
+        run: |
+          npm install --frozen-lockfile
+
+      - name: Собрать React-приложение (TypeScript)
+        run: |
+          npm run build
+
+      - name: Подключиться к серверу и развернуть приложение
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+          SERVER_USER: ubuntu
+          SERVER_IP: ec2-52-15-140-47.us-east-2.compute.amazonaws.com
+          APP_DIR: /home/ubuntu/bom-matcher-client
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
+          rsync -avz --delete ./build/ $SERVER_USER@$SERVER_IP:$APP_DIR/build
+
+          ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_IP << 'EOF'
+            cd $APP_DIR
+            npm install -g serve pm2
+            pm2 delete bom-matcher || true
+            pm2 start serve --name bom-matcher -- serve -s build -l 3000
+            pm2 save
+          EOF
