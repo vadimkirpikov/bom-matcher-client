@@ -54,6 +54,7 @@ const UploadForm = () => {
         formData.append("pdf", file);
 
         try {
+            console.log(formData);
             const response = await fetch(
                 `http://52.15.140.47:80/upload?googleSheetUrl=${encodeURIComponent(googleSheetLink)}&sheetName=${encodeURIComponent(sheetName)}&fastMode=${fastMode}`,
                 {
