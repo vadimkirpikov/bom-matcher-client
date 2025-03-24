@@ -31,7 +31,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
           SERVER_USER: ubuntu
           SERVER_IP: ec2-52-15-140-47.us-east-2.compute.amazonaws.com
-          APP_DIR: /home/ubuntu/bom-matcher-client
+          APP_DIR: /home/ubuntu/bm
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
@@ -39,7 +39,7 @@ jobs:
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
           # Используем scp для копирования файлов
-          scp -r -i ~/.ssh/id_rsa dist/ $SERVER_USER@$SERVER_IP:$APP_DIR/build
+          scp -r -i ~/.ssh/id_rsa dist/ $SERVER_USER@$SERVER_IP:$APP_DIR
 
           # Установим Node.js и pm2 на сервере, если не установлены
           ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_IP << 'EOF'
@@ -58,8 +58,6 @@ jobs:
               sudo npm install -g serve
             fi
 
-            # Перезапуск и развертывание приложения
-            cd $APP_DIR
             pm2 delete all
-            pm2 start "serve -s build -l 3000" --name bom-matcher
+            pm2 start "serve -s bm -l tcp://0.0.0.0:3000" --name bom-matcher
           EOF

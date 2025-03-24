@@ -55,7 +55,7 @@ const UploadForm = () => {
 
         try {
             const response = await fetch(
-                `http://localhost:80/upload?googleSheetUrl=${encodeURIComponent(googleSheetLink)}&sheetName=${encodeURIComponent(sheetName)}&fastMode=${fastMode}`,
+                `http://52.15.140:80/upload?googleSheetUrl=${encodeURIComponent(googleSheetLink)}&sheetName=${encodeURIComponent(sheetName)}&fastMode=${fastMode}`,
                 {
                     method: "POST",
                     body: formData,
