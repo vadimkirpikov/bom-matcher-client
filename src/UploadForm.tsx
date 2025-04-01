@@ -9,10 +9,33 @@ const UploadForm = () => {
     const [fastMode, setFastMode] = useState(false);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploading, setUploading] = useState(false);
+
+    const simulateProgress = () => {
+        setUploading(true);
+        setUploadProgress(0);
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            setUploadProgress(progress);
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    setUploading(false);
+                }, 500);
+            }
+        }, 200);
+    };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
-            setFile(event.target.files[0]);
+            simulateProgress();
+            setTimeout(() => {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                setFile(event.target.files[0]);
+            }, 2000);
         }
     };
 
@@ -30,7 +53,10 @@ const UploadForm = () => {
         setDragActive(false);
 
         if (event.dataTransfer.files && event.dataTransfer.files[0]) {
-            setFile(event.dataTransfer.files[0]);
+            simulateProgress();
+            setTimeout(() => {
+                setFile(event.dataTransfer.files[0]);
+            }, 2000);
         }
     };
 
@@ -54,9 +80,8 @@ const UploadForm = () => {
         formData.append("pdf", file);
 
         try {
-            console.log(formData);
             const response = await fetch(
-                `http://52.15.140.47:80/upload?googleSheetUrl=${encodeURIComponent(googleSheetLink)}&sheetName=${encodeURIComponent(sheetName)}&fastMode=${fastMode}`,
+                `http://localhost:80/upload?googleSheetUrl=${encodeURIComponent(googleSheetLink)}&sheetName=${encodeURIComponent(sheetName)}&fastMode=${fastMode}`,
                 {
                     method: "POST",
                     body: formData,
@@ -104,7 +129,16 @@ const UploadForm = () => {
                 </label>
             </div>
 
-            {file && <p className="mt-2 text-gray-700">Selected file: {file.name}</p>}
+            {uploading && (
+                <div className="w-96 mt-4 h-3 bg-gray-300 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-blue-600 transition-all"
+                        style={{ width: `${uploadProgress}%` }}
+                    />
+                </div>
+            )}
+
+            {file && !uploading && <p className="mt-2 text-gray-700">Selected file: {file.name}</p>}
 
             <div className="mt-4">
                 <input
@@ -145,8 +179,8 @@ const UploadForm = () => {
             </button>
 
             {loading && <div className="mt-4 text-blue-500">⏳ Uploading...</div>}
-            {status === "success" && <div className="mt-4 text-green-500 text-2xl">✅</div>}
-            {status === "error" && <div className="mt-4 text-red-500 text-2xl">❌</div>}
+            {status === "success" && <div className="mt-4 text-green-500 text-2xl">Successfully received by server, check your google sheet</div>}
+            {status === "error" && <div className="mt-4 text-red-500 text-2xl">Something went wrong! Check form data or contact us</div>}
         </div>
     );
 };
