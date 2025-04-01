@@ -57,7 +57,7 @@ jobs:
             if ! command -v serve &> /dev/null; then
               sudo npm install -g serve
             fi
-
+            cd bm
             pm2 delete all
-            pm2 start "serve -s bm -l 3000" --name bom-matcher
+            pm2 start "serve -s dist -l 3000" --name bom-matcher
           EOF
